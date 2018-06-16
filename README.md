@@ -31,7 +31,7 @@ cp config.conf.example ~/ircservicesgateway/config.conf
 ### Running
 cd ~/ircservicesgateway
 
-Run `./webircgateway` to start it.
+Run `./ircservicesgateway` to start it.
 
 It is possible to start it up via system services like init.d or systemd but will not be included yet until further development has been completed.
 
