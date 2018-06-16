@@ -1,0 +1,15 @@
+# 1 = Debug; 2 = Info; 3 = Warn;
+logLevel = 3
+
+# The http server
+[server.1]
+bind = "0.0.0.0"
+port = 8092
+
+# IRC Network Services
+[ircservices]
+xmlrpc_url = "http://127.0.0.1:8080/xmlrpc"
+nscookiename = "IRCSERVICEAUTH"
+nscookiehashkey = "MY_IRCSERVICEAUTH_HASH_KEY"
+nscookiedomain = ".example.com"
+ircservices_uri = "/webirc/ircservices/"
