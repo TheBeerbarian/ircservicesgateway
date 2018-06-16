@@ -36,7 +36,7 @@ Run `./ircservicesgateway` to start it.
 It is possible to start it up via system services like init.d or systemd but will not be included yet until further development has been completed.
 
 
-Accessing the ircservicesgateway server:
+### Accessing the ircservicesgateway server
 
 During development the methods used to request the ircservicesgateway request may be in flux until fully determined with the help of other contributors.
 
