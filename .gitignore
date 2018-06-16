@@ -1,3 +1,5 @@
 /vendor/
 .vscode
 config.conf
+debug
+main
