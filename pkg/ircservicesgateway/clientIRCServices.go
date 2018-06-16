@@ -76,8 +76,8 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if ipaddr == "" {
-		ipaddr = r.Header.Get("X-Forwarded-For") //TODO: may not be proxied. Need fallback.
+	if ipaddr == "0" {
+		//ipaddr = r.Header.Get("X-Forwarded-For") //TODO: may not be proxied. Need fallback.
 	}
 
 	Atheme, err := atheme.NewAtheme(netservicesConfig.XmlrpcURL)
@@ -181,7 +181,7 @@ func ircservicesRespond(w http.ResponseWriter, r *http.Request) {
 		//err error
 		authcookie = "*"
 		account    = ""
-		ipaddr     = r.Header.Get("X-Forwarded-For") //TODO: may not be proxied. Need fallback.
+		ipaddr     = "0" //r.Header.Get("X-Forwarded-For") //TODO: may not be proxied. Need fallback.
 		hashkey    = []byte(netservicesConfig.nsCookieHashKey)
 		s          = securecookie.New(hashkey, nil)
 	)
