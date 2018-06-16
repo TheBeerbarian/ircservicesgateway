@@ -19,7 +19,7 @@ To update your existing source:
 
 Building from source:
 
-~~~bash
+
 cd ~/go/src/github.com/thebeerbarian/ircservicesgateway
 
 mkdir -p ~/ircservicesgateway
@@ -35,12 +35,14 @@ Run `./webircgateway` to start it.
 
 It is possible to start it up via system services like init.d or systemd but will not be included yet until further development has been completed.
 
-### Accessing the ircservicesgateway server
+
+Accessing the ircservicesgateway server:
 
 During development the methods used to request the ircservicesgateway request may be in flux until fully determined with the help of other contributors.
 
 Currently the current method is to issue a login POST method to `http://host/webirc/ircservices/` with form inputs of type text for `nick` and type password for `password`.  If successful, the network services will return an `authcookie string`, `account string`, and `ipaddr string` that the ircservicesgateway will issue an encrypted cookie to the end user.  After the end user has a valid cookie, the next POST method with a network services command will be processes as the authorized user for the login.  The post method is still under development, but may be as easy as just using a form input of type text of `nickserv info nick` for example.
 
+Credit where credit is due:
 
 ### Derivative Work from "github.com/kiwiirc/webircgateway".
 ### License
