@@ -44,9 +44,10 @@ Currently the current method is to issue a login POST method to `http://host/web
 
 ### Credit where credit is due:
 
-Derivative Work from `github.com/kiwiirc/webircgateway`.
-License and Original Copyright of parent source.
-~~
+This repository is derived from original source at `github.com/kiwiirc/webircgateway`.
+
+### License and Original Copyright of parent source
+~~~
    Copyright 2017 Kiwi IRC
 
    Licensed under the Apache License, Version 2.0 (the "License");
