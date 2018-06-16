@@ -20,16 +20,16 @@ To update your existing source:
 Building from source:
 
 
-cd ~/go/src/github.com/thebeerbarian/ircservicesgateway
+`cd ~/go/src/github.com/thebeerbarian/ircservicesgateway`
 
-mkdir -p ~/ircservicesgateway
+`mkdir -p ~/ircservicesgateway`
 
-go build -o ~/ircservicesgateway/ircservicesgateway main.go
+`go build -o ~/ircservicesgateway/ircservicesgateway main.go`
 
-cp config.conf.example ~/ircservicesgateway/config.conf
+`cp config.conf.example ~/ircservicesgateway/config.conf`
 
 ### Running
-cd ~/ircservicesgateway
+`cd ~/ircservicesgateway`
 
 Run `./ircservicesgateway` to start it.
 
@@ -42,11 +42,11 @@ During development the methods used to request the ircservicesgateway request ma
 
 Currently the current method is to issue a login POST method to `http://host/webirc/ircservices/` with form inputs of type text for `nick` and type password for `password`.  If successful, the network services will return an `authcookie string`, `account string`, and `ipaddr string` that the ircservicesgateway will issue an encrypted cookie to the end user.  After the end user has a valid cookie, the next POST method with a network services command will be processes as the authorized user for the login.  The post method is still under development, but may be as easy as just using a form input of type text of `nickserv info nick` for example.
 
-Credit where credit is due:
+### Credit where credit is due:
 
-### Derivative Work from "github.com/kiwiirc/webircgateway".
-### License
-~~~
+Derivative Work from `github.com/kiwiirc/webircgateway`.
+License and Original Copyright of parent source.
+~~
    Copyright 2017 Kiwi IRC
 
    Licensed under the Apache License, Version 2.0 (the "License");
