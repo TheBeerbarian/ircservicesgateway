@@ -49,13 +49,13 @@ func (ns *NickServ) OwnInfo() (map[string]string, error) {
 // Modifed to handle changes due to later versions of Antheme.
 func (ns *NickServ) Info(target string) (res map[string]string, err error) {
 	var (
-	       output string
-	       key string
-	       value string
+		output string
+		key    string
+		value  string
 	)
-	
-        if res == nil {
-               res = make(map[string]string, 20)
+
+	if res == nil {
+		res = make(map[string]string, 20)
 	}
 
 	output, err = ns.a.Command("NickServ", "INFO", target)
@@ -69,7 +69,7 @@ func (ns *NickServ) Info(target string) (res map[string]string, err error) {
 			res["account"] = accname
 
 			continue
-	        }
+		}
 
 		/*
 			Registered : Aug 15 19:44:03 2014 (2h 43m 55s ago)
@@ -84,9 +84,9 @@ func (ns *NickServ) Info(target string) (res map[string]string, err error) {
 			fields := strings.SplitN(line, ":", 2)
 			key := strings.TrimSpace(fields[0])
 			value := strings.TrimSpace(fields[1])
-		
+
 			key = strings.Join(strings.Split(key, " "), "-")
-		
+
 			if key == "Metadata" {
 				/*
 					Metadata   : friendcode = 0877-1711-6824
@@ -96,18 +96,18 @@ func (ns *NickServ) Info(target string) (res map[string]string, err error) {
 				key = "meta-" + metadata[0]
 				value = metadata[1]
 			}
-		        res[strings.ToLower(key)] = strings.TrimSpace(value)
-		        continue	
-		}
-		
-		if strings.HasPrefix(line, "Testing has enabled nick protection") {
-			res["enforced"] = "Yes"
-		        res[strings.ToLower(key)] = strings.TrimSpace(value)
+			res[strings.ToLower(key)] = strings.TrimSpace(value)
 			continue
 		}
-		
+
+		if strings.HasPrefix(line, "Testing has enabled nick protection") {
+			res["enforced"] = "Yes"
+			res[strings.ToLower(key)] = strings.TrimSpace(value)
+			continue
+		}
+
 		if strings.HasPrefix(line, "*** End") {
-		        continue
+			continue
 		}
 
 	}
@@ -115,8 +115,7 @@ func (ns *NickServ) Info(target string) (res map[string]string, err error) {
 	return
 }
 
-
-// Info gets raw NickServ info on an arbitrary user or returns an error.
+// Rawinfo ... Info gets raw NickServ info on an arbitrary user or returns an error.
 func (ns *NickServ) Rawinfo(target string) (res string, err error) {
 	var output string
 

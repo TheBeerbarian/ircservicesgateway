@@ -13,7 +13,7 @@ type ChanServ struct {
 
 // Flagset is a simple flagset wrapper.
 type Flagset struct {
-	Id    int    `json:"id"`
+	ID    int    `json:"id"`
 	Nick  string `json:"nick"`
 	Flags string `json:"flags"`
 }
@@ -54,7 +54,7 @@ func (cs *ChanServ) GetAccessList(channel string) (res []Flagset, err error) {
 		id, _ := strconv.Atoi(data[0])
 
 		res = append(res, Flagset{
-			Id:    id,
+			ID:    id,
 			Nick:  data[1],
 			Flags: data[2],
 		})

@@ -98,7 +98,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = Atheme.Login(nick, password)
+		err = Atheme.Login(nick, password, w, r)
 
 		if err != nil {
 			logOut(WARN, "Atheme error: %s", err.Error())

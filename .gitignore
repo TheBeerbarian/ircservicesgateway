@@ -1,5 +1,7 @@
 /vendor/
 .vscode
 config.conf
+Gopkg.lock
+Gopkg.toml
 debug
 main

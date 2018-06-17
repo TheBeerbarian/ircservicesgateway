@@ -1,17 +1,17 @@
 package main
 
 import (
-        "flag"
-        "fmt"
-        "log"
-        "os"
-        "os/signal"
-        "syscall"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
-        "github.com/thebeerbarian/ircservicesgateway/pkg/ircservicesgateway"
+	"github.com/thebeerbarian/ircservicesgateway/pkg/ircservicesgateway"
 )
 
-
+//VERSION ...
 const VERSION = "0.1.0"
 
 func init() {
@@ -21,17 +21,17 @@ func init() {
 func main() {
 	printVersion := flag.Bool("version", false, "Print the version")
 	configFile := flag.String("config", "config.conf", "Config file location")
-	
+
 	if *printVersion {
 		fmt.Println(ircservicesgateway.Version)
 		os.Exit(0)
 	}
 
-        runGateway(*configFile)
+	runGateway(*configFile)
 }
 
 func runGateway(configFile string) {
-        // Print any ircservicesgateway logout to STDOUT
+	// Print any ircservicesgateway logout to STDOUT
 	go printLogOutput()
 
 	ircservicesgateway.SetConfigFile(configFile)
