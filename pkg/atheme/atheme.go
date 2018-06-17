@@ -97,7 +97,7 @@ func (a *Atheme) Cmd(target []string, w http.ResponseWriter, r *http.Request) (r
 }
 
 // Login attempts to log a user into Atheme. It returns true or false
-func (a *Atheme) Login(username, password string, w http.ResponseWriter, r *http.Request) (err error) {
+func (a *Atheme) Login(username string, password string, w http.ResponseWriter, r *http.Request) (err error) {
 	var authcookie string
 	//var reader io.Reader
 	//decoder := xml.NewDecoder(reader)
