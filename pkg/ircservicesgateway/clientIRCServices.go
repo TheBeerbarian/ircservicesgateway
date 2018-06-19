@@ -1,18 +1,27 @@
 package ircservicesgateway
 
 import (
+        //"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	//"io/ioutil"
 	"math/rand"
 	"net/http"
 	//"strings"
 
 	"github.com/gorilla/securecookie"
+	"github.com/nilshell/xmlrpc"
 	//"github.com/thebeerbarian/ircservicesgateway/pkg/atheme"
 )
 
-// Struct ircservices contains all fields for
+// Struct Ircns (IRC Network Services)
+type Ircns struct {
+        Account     string   // Account Atheme is logged in as
+        Authcookie  string
+        Ipaddr      string
+}
+
 var (
 	//Atheme            *atheme.Atheme
 	netservicesConfig ConfigNetServices
@@ -82,32 +91,50 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 
 	//Setup client writer/responder to send/receive data from XMLRPC server source.
 	//Atheme, err := atheme.NewAtheme(netservicesConfig.XmlrpcURL)
-
+	client, _ := xmlrpc.NewClient(netservicesConfig.XmlrpcURL, nil)
+	result := xmlrpc.Struct{}
+	
 	// No valid authcookie, login required from form data.
 	if authcookie == "*" {
 
-		//nick := r.PostFormValue("nick")
+		//username := r.PostFormValue("nick")
 		//password := r.PostFormValue("password")
 
-		if err != nil {
-			logOut(WARN, "%s", err)
-			return
-		}
-
-		//No data back from source.
-		//if Source == nil {
-		//	logOut(WARN, "Data source is nil")
-		//	return
-		//}
-
-		//process Login 
+		//Atheme process Login 
 		//err = Login(nick, password, w, r)
+		//err := client.Call("atheme.login", []string{username, password, "::1"}, &result)
 
+		//Anope checkAuthentication
+		err := client.Call("checkAuthentication", []string{username, password}, &result)
+
+		//Anope command
+		//err := client.Call("command", []string{service, user, command}, &result)
+		//err := client.Call("command", []string{"nickserv", "botserv", "info"}, &result)
+
+		//Anope stats
+		//err := client.Call("stats", null, &result)
+		
+		//Anope channel
+		//err := client.Call("channel", []string{channel}, &result)
+		
+		//Anope user
+		//err := client.Call("user", []string{user}, &result)
+		
+		//Anope opers
+		//err := client.Call("opers", null, &result)
+		
+		//Anope notice
+		//err := client.Call("notice", []string{source, target, message}, &result)
+		
 		if err != nil {
 			logOut(WARN, "Login error: %s", err.Error())
 			return
 		}
 
+		fmt.Fprint(w, result, "\n")
+		//var out string = BytesToString(result)
+		//w.Write(out)
+		return
 		// Valid auth.  Generate and store encoded cookie.
 		if authcookie != "*" {
 		//	authcookie = Authcookie
@@ -278,4 +305,15 @@ func postpage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "    </div></form>")
 	fmt.Fprintln(w, "  </body></div>")
 	fmt.Fprintln(w, "</html>")
+}
+
+func check(err error) {
+        if err != nil {
+	        logOut(2, "Error: %s", err)
+		return
+        }
+}
+
+func BytesToString(data []byte) string {
+     return string(data[:])
 }

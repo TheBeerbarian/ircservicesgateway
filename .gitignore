@@ -1,6 +1,7 @@
 /vendor/
 .vscode
 config.conf
+config.conf~
 Gopkg.lock
 Gopkg.toml
 debug
