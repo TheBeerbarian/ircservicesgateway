@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strings"
+	//"strings"
 
 	"github.com/gorilla/securecookie"
-	"github.com/thebeerbarian/ircservicesgateway/pkg/atheme"
+	//"github.com/thebeerbarian/ircservicesgateway/pkg/atheme"
 )
 
 // Struct ircservices contains all fields for
 var (
-	Atheme            *atheme.Atheme
+	//Atheme            *atheme.Atheme
 	netservicesConfig ConfigNetServices
 
 	DEBUG = 1
@@ -26,7 +26,7 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 	var err error
 
 	//Get ConfigNetServices
-	netservicesConfig, err = findNetServices()
+	netservicesConfig, err = loadNetServices()
 	if err != nil {
 		logOut(3, "No IRC Network Services available")
 		return
@@ -80,86 +80,80 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		//ipaddr = r.Header.Get("X-Forwarded-For") //TODO: may not be proxied. Need fallback.
 	}
 
-	Atheme, err := atheme.NewAtheme(netservicesConfig.XmlrpcURL)
+	//Setup client writer/responder to send/receive data from XMLRPC server source.
+	//Atheme, err := atheme.NewAtheme(netservicesConfig.XmlrpcURL)
 
 	// No valid authcookie, login required from form data.
 	if authcookie == "*" {
 
-		nick := r.PostFormValue("nick")
-		password := r.PostFormValue("password")
+		//nick := r.PostFormValue("nick")
+		//password := r.PostFormValue("password")
 
 		if err != nil {
 			logOut(WARN, "%s", err)
 			return
 		}
 
-		if Atheme == nil {
-			logOut(WARN, "Atheme is nil")
-			return
-		}
+		//No data back from source.
+		//if Source == nil {
+		//	logOut(WARN, "Data source is nil")
+		//	return
+		//}
 
-		err = Atheme.Login(nick, password, w, r)
+		//process Login 
+		//err = Login(nick, password, w, r)
 
 		if err != nil {
-			logOut(WARN, "Atheme error: %s", err.Error())
+			logOut(WARN, "Login error: %s", err.Error())
 			return
 		}
 
 		// Valid auth.  Generate and store encoded cookie.
-		if Atheme.Authcookie != "*" {
-			authcookie = Atheme.Authcookie
-			account = Atheme.Account
-			value := map[string]string{
-				"authcookie": Atheme.Authcookie,
-				"account":    Atheme.Account,
-				"ipaddr":     ipaddr,
-			}
+		if authcookie != "*" {
+		//	authcookie = Authcookie
+		//	account = Account
+		//	value := map[string]string{
+		//		"authcookie": Authcookie,
+		//		"account":    Account,
+		//		"ipaddr":     ipaddr,
+		//	}
 
-			if encoded, err := s.Encode(netservicesConfig.nsCookieName, value); err == nil {
-				cookie := &http.Cookie{
-					Name:   netservicesConfig.nsCookieName,
-					Value:  encoded,
-					Domain: netservicesConfig.nsCookieDomain,
-				}
-				logOut(DEBUG, "cookie ", cookie)
-				http.SetCookie(w, cookie)
-				logOut(DEBUG, "Stored nsCookieName. authcookie: '%s', account: '%s' ipaddr: '%s'", Atheme.Authcookie, Atheme.Account, ipaddr)
-			}
+		//	if encoded, err := s.Encode(netservicesConfig.nsCookieName, value); err == nil {
+		//		cookie := &http.Cookie{
+		//			Name:   netservicesConfig.nsCookieName,
+		//			Value:  encoded,
+		//			Domain: netservicesConfig.nsCookieDomain,
+		//		}
+		//		logOut(DEBUG, "cookie ", cookie)
+		//		http.SetCookie(w, cookie)
+		//		logOut(DEBUG, "Stored nsCookieName. authcookie: '%s', account: '%s' ipaddr: '%s'", Authcookie, Account, ipaddr)
+		//	}
 		}
+		
 	} else {
+	
+		//Setup vars from decoded cookie
+		//Account = account
+		//Ipaddr = ipaddr
 
-		if err != nil {
-			logOut(WARN, "%s", err)
-			return
-		}
-
-		if Atheme == nil {
-			logOut(WARN, "Atheme is nil")
-			return
-		}
-
-		Atheme.Authcookie = authcookie
-		Atheme.Account = account
-		Atheme.Ipaddr = ipaddr
-
-		//If sending to Atheme Cmd function similar to `/privmsg ServiceName Command args`
-		commands := strings.Split(r.PostFormValue("command"), " ")
-		logOut(DEBUG, "Atheme Commands: %s", commands)
-		result, err := Atheme.Cmd(commands, w, r)
+		//If requesting data similar to `/privmsg ServiceName Command args`
+		//commands := strings.Split(r.PostFormValue("command"), " ")
+		//logOut(DEBUG, "Commands: %s", commands)
+		//result, err := Cmd(commands, w, r)
 
 		//If was sending to service name functions. Following would just need to pass the Nick.
 		//var result map[string]string
 		//command := r.PostFormValue("command")
-		//logOut(DEBUG, "Atheme Command: %s", command)
-		//result, err := Atheme.NickServ.Info(command)
+		//logOut(DEBUG, "Command: %s", command)
+		//result, err := NickServ.Info(command)
 
 		if err != nil {
 			fmt.Fprint(w, "\n", err.Error(), "\n")
-			logOut(WARN, "Atheme error: %s", err.Error())
+			logOut(WARN, "error: %s", err.Error())
 			return
 		}
 
-		fmt.Fprint(w, result, "\n")
+		//fmt.Fprint(w, result, "\n")
 
 	}
 
@@ -229,7 +223,7 @@ func ircservicesRespond(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func findNetServices() (ConfigNetServices, error) {
+func loadNetServices() (ConfigNetServices, error) {
 	var ret ConfigNetServices
 
 	if len(Config.NetServices) == 0 {
