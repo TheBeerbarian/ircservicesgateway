@@ -21,9 +21,9 @@ type ConfigNetServices struct {
 	XmlrpcURL       string
 	nsCookieName    string
 	nsCookieHashKey string
-	//	nsCookieHashKey	     []byte
-	nsCookieDomain string
-	IRCservicesURI string
+	nsCookieDomain  string
+	IRCservicesURI  string
+	IRCservicesTest bool
 }
 
 // Config Structures
@@ -95,6 +95,7 @@ func LoadConfig() error {
 			ircservices.nsCookieHashKey = section.Key("nscookiehashkey").MustString("MY_IRCSERVICEAUTH_HASH_KEY")
 			ircservices.nsCookieDomain = section.Key("nscookiedomain").MustString("")
 			ircservices.IRCservicesURI = section.Key("ircservices_uri").MustString("/webirc/ircservices/")
+			ircservices.IRCservicesTest = section.Key("ircsercices_test").MustBool(false)
 
 			Config.NetServices = append(Config.NetServices, ircservices)
 		}

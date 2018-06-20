@@ -13,3 +13,4 @@ nscookiename = "IRCSERVICEAUTH"
 nscookiehashkey = "MY_IRCSERVICEAUTH_HASH_KEY"
 nscookiedomain = ".example.com"
 ircservices_uri = "/webirc/ircservices/"
+ircsercices_test = false
