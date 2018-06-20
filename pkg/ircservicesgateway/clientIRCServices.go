@@ -53,7 +53,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 
 	//Setup client writer/responder to send/receive data from XMLRPC server source.
 	client, _ := xmlrpc.NewClient(netservicesConfig.XmlrpcURL, nil)
-	result    := xmlrpc.Struct{}
+	result := xmlrpc.Struct{}
 	
    	//Method being defined for testing, method will be from HTTP POST.
 	method := r.PostFormValue("method")
@@ -63,52 +63,35 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 	
 
 		logOut(DEBUG, "XMLRPC method: %s", method)
-
-		methodMap := map[string]interface{}{ "method": method }
+		
+		// Default minimum map setup.
+		methodMap := xmlrpc.Struct{ "method": method }
 		
 		switch method {
 		case "checkAuthentication": //Anope
 			username := r.PostFormValue("nick")
 			password := r.PostFormValue("password")
-
-			//Anope checkAuthentication
-			err := client.Call("checkAuthentication", []string{username, password}, &result)
+			err := client.Call(method, []string{username, password}, &result)
 			check (err, w, r)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
 		case "command": //Anope command
 		        service := r.PostFormValue("service")
 		        command := r.PostFormValue("command")
-		        err := client.Call("command", []string{service, "ircservicesgateway", command}, &result)
+		        err := client.Call(method, []string{service, "ircservicesgateway", command}, &result)
 			check (err, w, r)
-			serviceMap := map[string]interface{}{ "service": service }
-			commandMap := map[string]interface{}{ "command": command }
-			for k, v := range methodMap {
-			        result[k] = v
-			}
-			for k, v := range serviceMap {
-			        result[k] = v
-			}
-			for k, v := range commandMap {
-			        result[k] = v
-			}
-			userMap := map[string]interface{}{ "user": "ircservicesgateway" } //replace with requesting user?
-			for k, v := range userMap {
-			        result[k] = v
-			}
+			methodMap := xmlrpc.Struct{ "method": method, "service": service, "command": command,
+				  "user": "ircservicesgateway" } //replace with requesting user when possible?
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
 		case "stats":  //Anope stats
-		        err := client.Call("stats", nil, &result)
+		        err := client.Call(method, nil, &result)
 			check (err, w, r)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
@@ -116,13 +99,8 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		        channel := r.PostFormValue("channel")
 		        err := client.Call("channel", []string{channel}, &result)
 			check (err, w, r)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
-			channelMap := map[string]interface{}{ "channel": channel }
-			for k, v := range channelMap {
-			        result[k] = v
-			}
+			methodMap := xmlrpc.Struct{ "method": method, "channel": channel }
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
@@ -130,22 +108,15 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		        user := r.PostFormValue("user")
 		        err := client.Call("user", []string{user}, &result)
 			check (err, w, r)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
-			userMap := map[string]interface{}{ "user": user }
-			for k, v := range userMap {
-			        result[k] = v
-			}
+			methodMap := xmlrpc.Struct{ "method": method, "user": user }
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
 		case "opers":  //Anope opers
 		        err := client.Call("opers", nil, &result)
 			check (err, w, r)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
@@ -153,20 +124,15 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		        //err := client.Call("notice", []string{source, target, message}, &result)
 		        err := client.Call("notice", []string{"CtB", "CtB", "Test message."}, &result)
 			check (err, w, r)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
+			result = mergeMaps(result, methodMap)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(result)
 			
 		default:
 	        	w.Header().Set("Content-Type", "application/json")
-			temp := map[string]string{"result": "error", "error": "Invalid Method"}
-		        json.NewEncoder(w).Encode(temp)
-			for k, v := range methodMap {
-			        result[k] = v
-			}
-			logOut(WARN, "Not a valid xmlrpc method: %s", method)
+			defaultMap := xmlrpc.Struct{"result": "error", "error": "Invalid Method"}
+		        json.NewEncoder(w).Encode(defaultMap)
+			logOut(DEBUG, "Not a valid xmlrpc method: %s", method)
 		        return
 		}
 		
@@ -205,6 +171,7 @@ func loadNetServices() (ConfigNetServices, error) {
 	return ret, nil
 }
 
+// loadPage - I didn't want to setup a template.
 func loadPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<!DOCTYPE html>")
 	fmt.Fprintln(w, "<html>")
@@ -279,6 +246,17 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "      </tr>")
 
 	fmt.Fprintln(w, "      <th colspan=\"3\" style=\"margin: 0 auto;padding: 0;text-align: left;\">")
+	fmt.Fprintln(w, "        <hr>&nbsp;&nbsp;Test to check for invalid POST Method.")
+	fmt.Fprintln(w, "      </th>")
+	fmt.Fprintln(w, "      <tr>")
+	fmt.Fprintln(w, "        <td>")
+	fmt.Fprintln(w, "          <input type=\"radio\" name=\"method\" value=\"notvalid\">")
+	fmt.Fprintln(w, "        </td><td>")
+	fmt.Fprintln(w, "        </td><td>")
+	fmt.Fprintln(w, "        </td>")
+	fmt.Fprintln(w, "      </tr>")
+
+	fmt.Fprintln(w, "      <th colspan=\"3\" style=\"margin: 0 auto;padding: 0;text-align: left;\">")
 	fmt.Fprintln(w, "          <br><button type=\"Submit\" value=\"Submit\">Submit</button>")
 	fmt.Fprintln(w, "      </th>")
 	fmt.Fprintln(w, "    </table>")
@@ -292,7 +270,7 @@ func check(err error, w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		temp := map[string]string{"result": "Failure", "error": "error"}
 		json.NewEncoder(w).Encode(temp)
-	        logOut(2, "Error: %s", err)
+	        logOut(DEBUG, "Error: %s", err)
 		return
         }
 }
@@ -301,3 +279,9 @@ func BytesToString(data []byte) string {
      return string(data[:])
 }
 
+func mergeMaps(map1 xmlrpc.Struct, map2 xmlrpc.Struct) xmlrpc.Struct {
+	for k, v := range map2 {
+	        map1[k] = v
+	}
+	return map1
+}
