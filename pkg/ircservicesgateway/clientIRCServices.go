@@ -277,10 +277,8 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "      </tr>")
 
 	fmt.Fprintln(w, "      <th colspan=\"3\" style=\"margin: 0 auto;padding: 0;text-align: left;\">")
-	fmt.Fprintln(w, "        <br><button type=\"Submit\" value=\"Submit\">Submit</button>")
+	fmt.Fprintln(w, "          <br><button type=\"Submit\" value=\"Submit\">Submit</button>")
 	fmt.Fprintln(w, "      </th>")
-	fmt.Fprintln(w, "      </td>")
-	fmt.Fprintln(w, "    </tr>")
 	fmt.Fprintln(w, "    </table>")
 	fmt.Fprintln(w, "  </form>")
 	fmt.Fprintln(w, "  </body>")
