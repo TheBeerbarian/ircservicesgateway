@@ -37,7 +37,7 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 			logOut(DEBUG, "Request method: %s", r.Method)
 			output, err := 	ircservicesCommand(w, r)
 			if err != nil {
-			        logOut(DEBUG, "Error: %s", r.Method)
+			        logOut(DEBUG, "Error: %s", err)
 			}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(output)
@@ -70,15 +70,13 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 		
 		// Default minimum map setup.
 		methodMap := xmlrpc.Struct{ "method": method }
-	        errClient := errors.New("Internal Client Call Error")
-
 		
 		switch method {
 		case "checkAuthentication": //Anope
 			username := r.PostFormValue("nick")
 			password := r.PostFormValue("password")
 			if err := client.Call(method, []string{username, password}, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			result = mergeMaps(result, methodMap)
 			return result, nil
@@ -87,7 +85,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 		        service := r.PostFormValue("service")
 		        command := r.PostFormValue("command")
 		        if err := client.Call(method, []string{service, "ircservicesgateway", command}, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			methodMap := xmlrpc.Struct{ "method": method, "service": service, "command": command,
 				  "user": "ircservicesgateway" } //replace with requesting user when possible?
@@ -96,7 +94,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 			
 		case "stats":  //Anope stats
 		        if err := client.Call(method, nil, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			result = mergeMaps(result, methodMap)
 			return result, nil
@@ -104,7 +102,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 		case "channel":  //Anope channel
 		        channel := r.PostFormValue("channel")
 		        if err := client.Call("channel", []string{channel}, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			methodMap := xmlrpc.Struct{ "method": method, "channel": channel }
 			result = mergeMaps(result, methodMap)
@@ -113,7 +111,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 		case "user":  //Anope user
 		        user := r.PostFormValue("user")
 		        if err := client.Call("user", []string{user}, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			methodMap := xmlrpc.Struct{ "method": method, "user": user }
 			result = mergeMaps(result, methodMap)
@@ -121,7 +119,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 			
 		case "opers":  //Anope opers
 		        if err := client.Call("opers", nil, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			result = mergeMaps(result, methodMap)
 			return result, nil
@@ -129,7 +127,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 		case "notice":  //Anope notice
 		        //err := client.Call("notice", []string{source, target, message}, &result)
 		        if err := client.Call("notice", []string{"CtB", "CtB", "Test message."}, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			result = mergeMaps(result, methodMap)
 			return result, nil
