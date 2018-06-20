@@ -35,18 +35,22 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 			ircservicesRespond(w, r)
 		case "POST":
 			logOut(DEBUG, "Request method: %s", r.Method)
-			ircservicesCommand(w, r)
+			output, err := 	ircservicesCommand(w, r)
+			if err != nil {
+			        logOut(DEBUG, "Error: %s", r.Method)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(output)
 		default:
 			logOut(DEBUG, "Invalid request method: %s", r.Method)
-			return
 		}
 	})
 }
 
-func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
+func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.Struct, err error) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Error reading POST form data", http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	//DEBUG logOut(1, "\u001b[31mI am here. \u001b[0m")
@@ -66,80 +70,86 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		
 		// Default minimum map setup.
 		methodMap := xmlrpc.Struct{ "method": method }
+	        errClient := errors.New("Internal Client Call Error")
+
 		
 		switch method {
 		case "checkAuthentication": //Anope
 			username := r.PostFormValue("nick")
 			password := r.PostFormValue("password")
-			err := client.Call(method, []string{username, password}, &result)
-			check (err, w, r)
+			if err := client.Call(method, []string{username, password}, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			return result, nil
 			
 		case "command": //Anope command
 		        service := r.PostFormValue("service")
 		        command := r.PostFormValue("command")
-		        err := client.Call(method, []string{service, "ircservicesgateway", command}, &result)
-			check (err, w, r)
+		        if err := client.Call(method, []string{service, "ircservicesgateway", command}, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			methodMap := xmlrpc.Struct{ "method": method, "service": service, "command": command,
 				  "user": "ircservicesgateway" } //replace with requesting user when possible?
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			return result, nil
 			
 		case "stats":  //Anope stats
-		        err := client.Call(method, nil, &result)
-			check (err, w, r)
+		        if err := client.Call(method, nil, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
-			
+			return result, nil
+
 		case "channel":  //Anope channel
 		        channel := r.PostFormValue("channel")
-		        err := client.Call("channel", []string{channel}, &result)
-			check (err, w, r)
+		        if err := client.Call("channel", []string{channel}, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			methodMap := xmlrpc.Struct{ "method": method, "channel": channel }
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			return result, nil
 			
 		case "user":  //Anope user
 		        user := r.PostFormValue("user")
-		        err := client.Call("user", []string{user}, &result)
-			check (err, w, r)
+		        if err := client.Call("user", []string{user}, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			methodMap := xmlrpc.Struct{ "method": method, "user": user }
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			return result, nil
 			
 		case "opers":  //Anope opers
-		        err := client.Call("opers", nil, &result)
-			check (err, w, r)
+		        if err := client.Call("opers", nil, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			return result, nil
 			
 		case "notice":  //Anope notice
 		        //err := client.Call("notice", []string{source, target, message}, &result)
-		        err := client.Call("notice", []string{"CtB", "CtB", "Test message."}, &result)
-			check (err, w, r)
+		        if err := client.Call("notice", []string{"CtB", "CtB", "Test message."}, &result); err != nil {
+				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, errClient
+			}
 			result = mergeMaps(result, methodMap)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			return result, nil
 			
 		default:
 	        	w.Header().Set("Content-Type", "application/json")
 			defaultMap := xmlrpc.Struct{"result": "error", "error": "Invalid Method"}
-		        json.NewEncoder(w).Encode(defaultMap)
 			logOut(DEBUG, "Not a valid xmlrpc method: %s", method)
-		        return
+			return defaultMap, nil
 		}
 		
 	} else {
-	        loadPage(w, r)
+	        if netservicesConfig.IRCservicesTest {
+	                loadPage(w, r)
+		}
 		logOut(DEBUG, "No method. Resending XMLRPC POST request page.")
+		return xmlrpc.Struct{"result": "error", "error": "No Method"},
+		        errors.New("No method. Resending XMLRPC POST request page.")
 	}
+	return
 }
 
 // Generate a temporary developer pages to post data to verify services functions are working.
@@ -149,11 +159,13 @@ func ircservicesRespond(w http.ResponseWriter, r *http.Request) {
         if netservicesConfig.IRCservicesTest { 
 	        loadPage(w, r)
 		logOut(DEBUG, "Present XMLRPC POST request page.")
+		return
 	} else {
         	w.Header().Set("Content-Type", "application/json")
 		temp := map[string]string{"status": "ready", "info": "Post a valid method"}
 	        json.NewEncoder(w).Encode(temp)
 		logOut(DEBUG, "Ready for XMLRPC request.")
+		return
 	}
 
 }
@@ -263,16 +275,6 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "  </form>")
 	fmt.Fprintln(w, "  </body>")
 	fmt.Fprintln(w, "</html>")
-}
-
-func check(err error, w http.ResponseWriter, r *http.Request) {
-        if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		temp := map[string]string{"result": "Failure", "error": "error"}
-		json.NewEncoder(w).Encode(temp)
-	        logOut(DEBUG, "Error: %s", err)
-		return
-        }
 }
 
 func BytesToString(data []byte) string {
