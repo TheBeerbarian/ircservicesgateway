@@ -84,10 +84,9 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		        service := r.PostFormValue("service")
 		        command := r.PostFormValue("command")
 		        err := client.Call("command", []string{service, "ircservicesgateway", command}, &result)
-		        //err := client.Call("command", []string{"nickserv", "Test", "info CtB"}, &result)
 			check (err, w, r)
-			serviceMap := map[string]interface{}{ "service": service } //replace with service
-			commandMap := map[string]interface{}{ "command": command } //replace with command
+			serviceMap := map[string]interface{}{ "service": service }
+			commandMap := map[string]interface{}{ "command": command }
 			for k, v := range methodMap {
 			        result[k] = v
 			}
@@ -97,7 +96,7 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 			for k, v := range commandMap {
 			        result[k] = v
 			}
-			userMap := map[string]interface{}{ "user": "Test" } //replace with user
+			userMap := map[string]interface{}{ "user": "ircservicesgateway" } //replace with requesting user?
 			for k, v := range userMap {
 			        result[k] = v
 			}
@@ -171,6 +170,9 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) {
 		        return
 		}
 		
+	} else {
+	        loadPage(w, r)
+		logOut(DEBUG, "No method. Resending XMLRPC POST request page.")
 	}
 }
 
