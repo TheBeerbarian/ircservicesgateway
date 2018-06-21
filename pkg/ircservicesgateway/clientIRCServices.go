@@ -24,20 +24,20 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 	//Get ConfigNetServices
 	netservicesConfig, err = loadNetServices()
 	if err != nil {
-		logOut(3, "No IRC Network Services available")
+		logOut(WARN, "ircservicesgateway:No IRC Network Services available")
 		return
 	}
 
 	router.HandleFunc(netservicesConfig.IRCservicesURI, func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			logOut(DEBUG, "Request method: %s", r.Method)
+			logOut(DEBUG, "ircservicesgateway:Request method: %s", r.Method)
 			ircservicesRespond(w)
 		case "POST":
-			logOut(DEBUG, "Request method: %s", r.Method)
+			logOut(DEBUG, "ircservicesgateway:Request method: %s", r.Method)
 			output, err := 	ircservicesCommand(r)
 			if err != nil {
-			        logOut(DEBUG, "Error: %s", err)
+			        logOut(DEBUG, "ircservicesgateway:Error: %s", err)
 				if netservicesConfig.IRCservicesTest {
 				        loadPage(w)
 					return
@@ -46,7 +46,7 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(output)
 		default:
-			logOut(DEBUG, "Invalid request method: %s", r.Method)
+			logOut(DEBUG, "ircservicesgateway:Invalid request method: %s", r.Method)
 		}
 	})
 }
@@ -68,7 +68,7 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 	//Have method. Attempt to process request.
 	if method != "" {
 
-		logOut(DEBUG, "XMLRPC method: %s", method)
+		logOut(DEBUG, "ircservicesgateway:XMLRPC method: %s", method)
 		
 		// Default minimum map setup.
 		methodMap := xmlrpc.Struct{ "method": method }
@@ -116,15 +116,16 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 			return result, nil
 		default:
 			defaultMap := xmlrpc.Struct{"result": "error", "error": "Invalid Method"}
-			logOut(DEBUG, "Not a valid xmlrpc method: %s", method)
+			logOut(DEBUG, "ircservicesgateway:Not a valid xmlrpc method: %s", method)
 			return defaultMap, nil
 		}
 	} else {
-		logOut(DEBUG, "No method. Resending XMLRPC POST request page.")
 	        if netservicesConfig.IRCservicesTest {
+		logOut(DEBUG, "ircservicesgateway:No method. Resending XMLRPC POST request page.")
 		        return xmlrpc.Struct{"result": "error", "error": "No Method"},
 		                errors.New("No method")
 		}
+		logOut(DEBUG, "ircservicesgateway:No method.")
 		return xmlrpc.Struct{"result": "error", "error": "No Method"},
 		        errors.New("No method")
 	}
@@ -137,13 +138,13 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 func ircservicesRespond(w http.ResponseWriter) {
         if netservicesConfig.IRCservicesTest { 
 	        loadPage(w)
-		logOut(DEBUG, "Present XMLRPC POST request page.")
+		logOut(DEBUG, "ircservicesgateway:Present XMLRPC POST request page.")
 		return
 	} else {
         	w.Header().Set("Content-Type", "application/json")
 		temp := map[string]string{"status": "ready", "info": "Post a valid method"}
 	        json.NewEncoder(w).Encode(temp)
-		logOut(DEBUG, "Ready for XMLRPC request.")
+		logOut(DEBUG, "ircservicesgateway:Ready for XMLRPC request.")
 		return
 	}
 }
