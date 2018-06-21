@@ -1,8 +1,11 @@
 
 ### Overview
-ircservicesgateway is still under development.  Not recomended to use at this time until a partial rewrite has been completed.
+ircservicesgateway is still under development.
+Currently working with Anope.
 
-The goal is for HTTP requests to be proxied by the ircservicesgateway to issue XMLRPC requests to a self-hosted irc network services (Atheme, Anope, etc.) then pass back data to the HTTP requestor.  An attempt will be made for the data to be passed back in raw format or a mapped format depending on the issued request format.
+HTTP POST requests are proxied by the ircservicesgateway to issue XMLRPC requests to a self-hosted irc network services (Atheme, Anope, etc.) then pass back the resultant data to the HTTP requestor.
+
+Data is passed back in JSON format.
 
 ### Building and development
 ircservicesgateway is built using Golang - make sure to have these programs installed and configured.
