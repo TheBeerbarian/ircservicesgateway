@@ -82,7 +82,6 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 			}
 			result = mergeMaps(result, methodMap)
 			return result, nil
-			
 		case "command": //Anope command
 		        service := r.PostFormValue("service")
 		        command := r.PostFormValue("command")
@@ -93,14 +92,12 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 				  "user": "ircservicesgateway" } //replace with requesting user when possible?
 			result = mergeMaps(result, methodMap)
 			return result, nil
-			
 		case "stats":  //Anope stats
 		        if err := client.Call(method, nil, &result); err != nil {
 				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
 			}
 			result = mergeMaps(result, methodMap)
 			return result, nil
-
 		case "channel":  //Anope channel
 		        channel := r.PostFormValue("channel")
 		        if err := client.Call("channel", []string{channel}, &result); err != nil {
@@ -109,7 +106,6 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 			methodMap := xmlrpc.Struct{ "method": method, "channel": channel }
 			result = mergeMaps(result, methodMap)
 			return result, nil
-			
 		case "user":  //Anope user
 		        user := r.PostFormValue("user")
 		        if err := client.Call("user", []string{user}, &result); err != nil {
@@ -118,28 +114,11 @@ func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 			methodMap := xmlrpc.Struct{ "method": method, "user": user }
 			result = mergeMaps(result, methodMap)
 			return result, nil
-			
-		case "opers":  //Anope opers
-		        if err := client.Call("opers", nil, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
-			}
-			result = mergeMaps(result, methodMap)
-			return result, nil
-			
-		case "notice":  //Anope notice
-		        //err := client.Call("notice", []string{source, target, message}, &result)
-		        if err := client.Call("notice", []string{"CtB", "CtB", "Test message."}, &result); err != nil {
-				return xmlrpc.Struct{"result": "error", "error": "Internal Client Call Error"}, err
-			}
-			result = mergeMaps(result, methodMap)
-			return result, nil
-			
 		default:
 			defaultMap := xmlrpc.Struct{"result": "error", "error": "Invalid Method"}
 			logOut(DEBUG, "Not a valid xmlrpc method: %s", method)
 			return defaultMap, nil
 		}
-		
 	} else {
 		logOut(DEBUG, "No method. Resending XMLRPC POST request page.")
 	        if netservicesConfig.IRCservicesTest {
