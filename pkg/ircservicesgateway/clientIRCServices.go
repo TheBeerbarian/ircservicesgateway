@@ -32,12 +32,16 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 		switch r.Method {
 		case "GET":
 			logOut(DEBUG, "Request method: %s", r.Method)
-			ircservicesRespond(w, r)
+			ircservicesRespond(w)
 		case "POST":
 			logOut(DEBUG, "Request method: %s", r.Method)
-			output, err := 	ircservicesCommand(w, r)
+			output, err := 	ircservicesCommand(r)
 			if err != nil {
 			        logOut(DEBUG, "Error: %s", err)
+				if netservicesConfig.IRCservicesTest {
+				        loadPage(w)
+					return
+				}
 			}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(output)
@@ -47,9 +51,8 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 	})
 }
 
-func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.Struct, err error) {
+func ircservicesCommand(r *http.Request) (output xmlrpc.Struct, err error) {
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Error reading POST form data", http.StatusInternalServerError)
 		return nil, err
 	}
 
@@ -64,7 +67,6 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 
 	//Have method. Attempt to process request.
 	if method != "" {
-	
 
 		logOut(DEBUG, "XMLRPC method: %s", method)
 		
@@ -133,19 +135,19 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 			return result, nil
 			
 		default:
-	        	w.Header().Set("Content-Type", "application/json")
 			defaultMap := xmlrpc.Struct{"result": "error", "error": "Invalid Method"}
 			logOut(DEBUG, "Not a valid xmlrpc method: %s", method)
 			return defaultMap, nil
 		}
 		
 	} else {
-	        if netservicesConfig.IRCservicesTest {
-	                loadPage(w, r)
-		}
 		logOut(DEBUG, "No method. Resending XMLRPC POST request page.")
+	        if netservicesConfig.IRCservicesTest {
+		        return xmlrpc.Struct{"result": "error", "error": "No Method"},
+		                errors.New("No method")
+		}
 		return xmlrpc.Struct{"result": "error", "error": "No Method"},
-		        errors.New("No method. Resending XMLRPC POST request page.")
+		        errors.New("No method")
 	}
 	return
 }
@@ -153,9 +155,9 @@ func ircservicesCommand(w http.ResponseWriter, r *http.Request) (output xmlrpc.S
 // Generate a temporary developer pages to post data to verify services functions are working.
 // Config.conf option to enable/disable.
 
-func ircservicesRespond(w http.ResponseWriter, r *http.Request) {
+func ircservicesRespond(w http.ResponseWriter) {
         if netservicesConfig.IRCservicesTest { 
-	        loadPage(w, r)
+	        loadPage(w)
 		logOut(DEBUG, "Present XMLRPC POST request page.")
 		return
 	} else {
@@ -165,24 +167,10 @@ func ircservicesRespond(w http.ResponseWriter, r *http.Request) {
 		logOut(DEBUG, "Ready for XMLRPC request.")
 		return
 	}
-
-}
-
-func loadNetServices() (ConfigNetServices, error) {
-	var ret ConfigNetServices
-
-	if len(Config.NetServices) == 0 {
-		return ret, errors.New("No IRC Network Services available")
-	}
-
-	randIdx := rand.Intn(len(Config.NetServices))
-	ret = Config.NetServices[randIdx]
-
-	return ret, nil
 }
 
 // loadPage - I didn't want to setup a template.
-func loadPage(w http.ResponseWriter, r *http.Request) {
+func loadPage(w http.ResponseWriter) {
 	fmt.Fprintln(w, "<!DOCTYPE html>")
 	fmt.Fprintln(w, "<html>")
 	fmt.Fprintln(w, "  <head>")
@@ -284,4 +272,16 @@ func mergeMaps(map1 xmlrpc.Struct, map2 xmlrpc.Struct) xmlrpc.Struct {
 	        map1[k] = v
 	}
 	return map1
+}
+
+func loadNetServices() (ConfigNetServices, error) {
+	var ret ConfigNetServices
+
+	if len(Config.NetServices) == 0 {
+		return ret, errors.New("No IRC Network Services available")
+	}
+
+	randIdx := rand.Intn(len(Config.NetServices))
+	ret = Config.NetServices[randIdx]
+	return ret, nil
 }
