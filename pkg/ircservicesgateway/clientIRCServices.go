@@ -29,6 +29,11 @@ func ircservicesHTTPHandler(router *http.ServeMux) {
 	}
 
 	router.HandleFunc(netservicesConfig.IRCservicesURI, func(w http.ResponseWriter, r *http.Request) {
+		logOut(DEBUG, "ircservicesgateway:Connect from remote address: '%s'", r.RemoteAddr)
+		if r.Header.Get("X-Forwarded-For") != "" {
+		        logOut(DEBUG, "ircservicesgateway:Connection is proxy for address: '%s'",
+		                r.Header.Get("X-Forwarded-For"))
+		}
 		switch r.Method {
 		case "GET":
 			logOut(DEBUG, "ircservicesgateway:Request method: %s", r.Method)
@@ -160,6 +165,9 @@ func loadPage(w http.ResponseWriter) {
 	fmt.Fprintln(w, "    <h1 style=\"color: black; font-family: verdana; text-align: center;\">")
 	fmt.Fprintln(w, "      IRC Services Tests Enabled")
 	fmt.Fprintln(w, "    </h1>")
+	fmt.Fprintln(w, "  <div style=\"margin: 0 auto;padding: 0;width: 600px;text-align: center;\">")
+	fmt.Fprintln(w, "    View page source for the values and names of the associated POST methods.<br><br>")
+	fmt.Fprintln(w, "  </div>")
 	fmt.Fprintln(w, "    <form action=\""+netservicesConfig.IRCservicesURI+"\" method=\"post\">")
 	fmt.Fprintln(w, "    <table style=\"margin: 0 auto;padding: 0;width: 450px;text-align: center;\">")
 	fmt.Fprintln(w, "      <th colspan=\"3\" style=\"margin: 0 auto;padding: 0;text-align: left;\">")
