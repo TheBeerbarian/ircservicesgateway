@@ -19,9 +19,9 @@ type ConfigServer struct {
 // Config IRCservices - A IRC Network Services config
 type ConfigNetServices struct {
 	XmlrpcURL       string
-	nsCookieName    string
-	nsCookieHashKey string
-	nsCookieDomain  string
+	NsCookieName    string
+	NsCookieHashKey string
+	NsCookieDomain  string
 	IRCservicesURI  string
 	IRCservicesTest bool
 }
@@ -91,9 +91,9 @@ func LoadConfig() error {
 		if strings.Index(section.Name(), "ircservices") == 0 {
 			ircservices := ConfigNetServices{}
 			ircservices.XmlrpcURL = section.Key("xmlrpc_url").MustString("http://127.0.0.1:8080/xmlrpc")
-			ircservices.nsCookieName = section.Key("nscookiename").MustString("IRCSERVICEAUTH")
-			ircservices.nsCookieHashKey = section.Key("nscookiehashkey").MustString("MY_IRCSERVICEAUTH_HASH_KEY")
-			ircservices.nsCookieDomain = section.Key("nscookiedomain").MustString("")
+			ircservices.NsCookieName = section.Key("nscookiename").MustString("IRCSERVICEAUTH")
+			ircservices.NsCookieHashKey = section.Key("nscookiehashkey").MustString("MY_IRCSERVICEAUTH_HASH_KEY")
+			ircservices.NsCookieDomain = section.Key("nscookiedomain").MustString("")
 			ircservices.IRCservicesURI = section.Key("ircservices_uri").MustString("/webirc/ircservices/")
 			ircservices.IRCservicesTest = section.Key("ircsercices_test").MustBool(false)
 

@@ -1,0 +1,38 @@
+package ircnetservices
+
+import (
+	"encoding/json"
+	//"errors"
+	//"fmt"
+	//"log"
+	//"math/rand"
+	"net/http"
+
+	//"github.com/amfranz/go-xmlrpc-client"  	//forked from "github.com/nilshell/xmlrpc"
+)
+
+// Config IRCservices - A IRC Network Services config
+type ConfigNetServices struct {
+	XmlrpcURL       string
+	NsCookieName    string
+	NsCookieHashKey string
+	NsCookieDomain  string
+	IRCservicesURI  string
+	IRCservicesTest bool
+}
+
+// Config Structures
+var Config struct {
+	//ConfigFile  string
+	//LogLevel    int
+	//Servers     []ConfigServer
+	NetServices []ConfigNetServices
+}
+
+func Netirc(w http.ResponseWriter, r *http.Request) {
+       	w.Header().Set("Content-Type", "application/json")
+	temp := map[string]string{"status": "ready", "info": "Post a valid method"}
+        json.NewEncoder(w).Encode(temp)
+	logOut(DEBUG, "ircservicesgateway:Ready for XMLRPC request.")
+	return
+}
